@@ -1,9 +1,11 @@
 # DEVELOPER NOTES
-# There are three methods to this script.
+# There are four methods to this script.
 # 1. getDataFromPdf() = Scrapes account numbers from records.pdf based on a regex pattern.
 # 2. createEmptyCsvTemplate() = Creates a new csv template with the correct column names.
-# 3. filterListToCSV() = Checks each account number meets the requirements, and if so it is added to the csv.
+# 3. Calculate remaining accounts and print to user terminal
+# 4. filterListToCSV() = Checks each account number meets the requirements, and if so it is added to the csv.
 # For performance and because of multiple exceptions being checked for, variables will only be instantiated if they need to be checked.
+
 import pdb
 import PyPDF2
 import re
@@ -15,14 +17,14 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
 # should start empty
-# results = []
+results = []
 
-testResults = ["000000113138", "000000131539", "140930010070", "029770021040", "349200130090", "055720130170" ]
-matchedResults = ["000000113138", "000000131539"]
-halfPayerExemption = ["140930010070"]
-disabledExemption = ['029770021040']
-over65exemption = ["349200130090", "055720130170"]
-results = testResults
+# testResults = ["000000113138", "000000131539", "140930010070", "029770021040", "349200130090", "055720130170" ]
+# matchedResults = ["000000113138", "000000131539"]
+# halfPayerExemption = ["140930010070"]
+# disabledExemption = ['029770021040']
+# over65exemption = ["349200130090", "055720130170"]
+# results = testResults
 
 def getDataFromPdf():
 	acctNumberRegex = re.compile(r'\d\d\d\d\d-\d\d\d-\d\d\d\d')
@@ -41,6 +43,7 @@ def createEmptyCsvTemplate():
 	file = open('output.csv', 'w+')
 	file.write("Salutation,First Name,Middle,Last Name,Suffix,Title,Company Name,Address Line 1,Address Line 2,City,State,Zip Code\n")
 	file.close()
+
 def countRemaining(currentIndex, resultsLength):
 	currentIndex += 1
 	remainingAccounts = int(resultsLength) - int(currentIndex)
@@ -148,6 +151,6 @@ def filterListToCSV():
 			countRemaining(int(results.index(acct)), len(results))
 			continue;
 
-# getDataFromPdf()
+getDataFromPdf()
 createEmptyCsvTemplate()
 filterListToCSV()
