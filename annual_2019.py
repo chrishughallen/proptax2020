@@ -9,7 +9,6 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
 results = []
-# results = ['000000131539', '000000113138']
 
 def getDataFromPdf():
 	acctNumberRegex = re.compile(r'\d\d\d\d\d-\d\d\d-\d\d\d\d')
@@ -102,7 +101,6 @@ def filterListToCSV():
 			print(acct + " couldn't be located on county website! " +  str(results.index(acct) +1))
 			continue;
 
-# getDataFromPdf()
-getDataFromPdf10()
+getDataFromPdf()
 createEmptyCsvTemplate()
 filterListToCSV()

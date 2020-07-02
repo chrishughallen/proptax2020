@@ -37,7 +37,7 @@ def getDataFromPdf():
 		for acct in accounts:
 			if acct not in results:
 				results.append(acct)
-	print(len(results))
+	print(str(len(results)) + " accounts pulled from records.pdf")
 
 def createEmptyCsvTemplate():
 	file = open('output.csv', 'w+')
