@@ -4,6 +4,7 @@
 # 2. createEmptyCsvTemplate() = Creates a new csv template with the correct column names.
 # 3. filterListToCSV() = Checks each account number meets the requirements, and if so it is added to the csv.
 # For performance and because of multiple exceptions being checked for, variables will only be instantiated if they need to be checked.
+import pdb
 import PyPDF2
 import re
 from selenium import webdriver
@@ -13,8 +14,15 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
+# should start empty
 # results = []
-results = ["140930010070"]
+
+testResults = ["000000113138", "000000131539", "140930010070", "029770021040", "349200130090", "055720130170" ]
+matchedResults = ["000000113138", "000000131539"]
+halfPayerExemption = ["140930010070"]
+disabledExemption = ['029770021040']
+over65exemption = ["349200130090", "055720130170"]
+results = testResults
 
 def getDataFromPdf():
 	acctNumberRegex = re.compile(r'\d\d\d\d\d-\d\d\d-\d\d\d\d')
@@ -33,6 +41,10 @@ def createEmptyCsvTemplate():
 	file = open('output.csv', 'w+')
 	file.write("Salutation,First Name,Middle,Last Name,Suffix,Title,Company Name,Address Line 1,Address Line 2,City,State,Zip Code\n")
 	file.close()
+def countRemaining(currentIndex, resultsLength):
+	currentIndex += 1
+	remainingAccounts = int(resultsLength) - int(currentIndex)
+	print(str(remainingAccounts) + " accounts remaining")
 
 def filterListToCSV():
 	browser = webdriver.Chrome()
@@ -44,7 +56,26 @@ def filterListToCSV():
 
 			# First check to see if account has an active lawsuit
 			if "none" not in pageContentLeft.lower():
-				print(acct + " has an active lawsuit - " + str(results.index(acct) +1))
+				print(acct + " has an active lawsuit #" + str(results.index(acct) +1))
+				countRemaining(int(results.index(acct)), len(results))
+				continue;
+
+			# Check if account has half payer exemption
+			if "The current year is under the half pay option - " in browser.page_source:
+				print(acct + " is under the half pay option #" + str(results.index(acct) +1))
+				countRemaining(int(results.index(acct)), len(results))
+				continue;
+
+			# Check if page has over 65 exemption
+			if "OVER 65" in browser.page_source:
+				print(acct + " has over 65 exemption #" + str(results.index(acct) +1))
+				countRemaining(int(results.index(acct)), len(results))
+				continue;
+
+			# Check for disabled exemption
+			if "DISABLED" in browser.page_source:
+				print(acct + " has disabled exemption #" + str(results.index(acct) +1))
+				countRemaining(int(results.index(acct)), len(results))
 				continue;
 
 			# Locate address and see if it's owned by Bexar County
@@ -54,6 +85,7 @@ def filterListToCSV():
 
 			if "bexar" in address.lower():
 				print(acct + " is owned by bexar county - " + str(results.index(acct) +1))
+				countRemaining(int(results.index(acct)), len(results))
 				continue;
 
 			# Locate total amount due and see if it's less than $2000
@@ -65,28 +97,9 @@ def filterListToCSV():
 			totalAmountDue = float(amtDue)
 
 			if totalAmountDue < 2000:
-				print(acct + " owes less than $2000 - " + str(results.index(acct) +1))
+				print(acct + " owes less than $2000 #" + str(results.index(acct) +1))
+				countRemaining(int(results.index(acct)), len(results))
 				continue;
-
-# FIX THIS SHIIEEETTTT AND YOU'RE GOLDEN
-
-			# Calculate bill exclusion and see if it's between 48% - 52%.
-			currentTaxLevyStart = pageContentLeft.find('Current Year Tax Levy:')
-			try:
-				currentTaxLevyEnd = pageContentLeft.find('Current Year Amount Due')
-			except:
-				currentTaxLevyEnd = pageContentLeft.find('*')
-			currentTaxLevy = pageContentLeft[currentTaxLevyStart + 22:currentTaxLevyEnd]
-			currentTaxLevy = currentTaxLevy.replace('$', '')
-			currentTaxLevy = currentTaxLevy.replace(',', '')
-			currentTaxYearLevy = float(currentTaxLevy)
-			billExclusion = currentTaxYearLevy / totalAmountDue
-			print(billExclusion)
-
-			# if billExclusion > .47:
-			# 	if billExclusion < .53:
-			# 		print(acct + " has a bill exclusion between 48% and 52%")
-			# 		continue;
 
 			# Calculate if total amount owed is more than 20% of the total market value
 			marketValStart = pageContentRight.find('Total Market Value:')
@@ -100,11 +113,13 @@ def filterListToCSV():
 				total = totalAmountDue / totalMarketValue
 
 				if total > .2:
-					# print(acct + " total owed is more than 20 percent of the market value! " + str(results.index(acct) +1))
+					print(acct + " total owed is more than 20 percent of the market value #" + str(results.index(acct) +1))
+					countRemaining(int(results.index(acct)), len(results))
 					continue;
 
-			# No exclusions
-			print(acct + " matched all of our criteria." + str(results.index(acct) +1))
+			# No exclusions if it reaches this point.
+			print(acct + " matched all of our criteria  #" + str(results.index(acct) +1))
+			countRemaining(int(results.index(acct)), len(results))
 			addressList = address.split("\n")
 
 			# Magic to render correctly to csv
@@ -129,9 +144,10 @@ def filterListToCSV():
 
 		# Exception - account number wasn't found on site
 		except:
-			print(acct + " couldn't be located on county website! " +  str(results.index(acct) +1))
+			print(acct + " couldn't be located on county website #" +  str(results.index(acct) +1))
+			countRemaining(int(results.index(acct)), len(results))
 			continue;
 
 # getDataFromPdf()
-# createEmptyCsvTemplate()
+createEmptyCsvTemplate()
 filterListToCSV()
