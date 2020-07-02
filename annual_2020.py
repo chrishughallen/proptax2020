@@ -44,7 +44,7 @@ def filterListToCSV():
 				countRemaining(int(results.index(acct)), len(results))
 				continue;
 
-			if "The current year is under the half pay option - " in browser.page_source:
+			if "The current year is under the half pay option" in browser.page_source:
 				print(acct + " is under the half pay option #" + str(results.index(acct) +1))
 				countRemaining(int(results.index(acct)), len(results))
 				continue;

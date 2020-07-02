@@ -17,14 +17,14 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
 # should start empty
-results = []
+# results = []
 
 # testResults = ["000000113138", "000000131539", "140930010070", "029770021040", "349200130090", "055720130170" ]
 # matchedResults = ["000000113138", "000000131539"]
-# halfPayerExemption = ["140930010070"]
+halfPayerExemption = ["140930010070", "098390010080"]
 # disabledExemption = ['029770021040']
 # over65exemption = ["349200130090", "055720130170"]
-# results = testResults
+results = halfPayerExemption
 
 def getDataFromPdf():
 	acctNumberRegex = re.compile(r'\d\d\d\d\d-\d\d\d-\d\d\d\d')
@@ -64,7 +64,7 @@ def filterListToCSV():
 				continue;
 
 			# Check if account has half payer exemption
-			if "The current year is under the half pay option - " in browser.page_source:
+			if "The current year is under the half pay option" in browser.page_source:
 				print(acct + " is under the half pay option #" + str(results.index(acct) +1))
 				countRemaining(int(results.index(acct)), len(results))
 				continue;
@@ -151,6 +151,6 @@ def filterListToCSV():
 			countRemaining(int(results.index(acct)), len(results))
 			continue;
 
-getDataFromPdf()
+# getDataFromPdf()
 createEmptyCsvTemplate()
 filterListToCSV()
